@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:Weather/models/city.dart';
 import 'package:Weather/models/weather.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherRepository {
@@ -51,6 +53,17 @@ class WeatherRepository {
       final weathers =
           json.map((weather) => Weather.fromJson(weather)).toList();
       return weathers;
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
+
+  Future<List<City>> fetchCity() async {
+    try {
+      final data = await rootBundle.loadString('assets/my.json');
+      final json = jsonDecode(data) as List;
+      final city = json.map((c) => City.fromJson(c)).toList();
+      return city;
     } catch (e) {
       return Future.error(e);
     }

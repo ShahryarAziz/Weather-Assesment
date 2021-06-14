@@ -80,49 +80,8 @@ class _WeatherForecastState extends State<WeatherForecastPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: DropdownButtonFormField(
-                            value: showDropDownText ? weather.cityName : null,
-                            onChanged: (value) {
-                              homeBloc.add(GetWeatherList(cityName: value));
-                            },
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            items: cityList
-                                .map((c) => DropdownMenuItem(
-                                value: c.city, child: Text(c.city)))
-                                .toList(),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.my_location),
-                          onPressed: ()async{
-                            final GeolocatorService instanceGeolocation =
-                            new GeolocatorService();
-                            try {
-                              final getCurrentLocation = await instanceGeolocation.determinePosition();
-                              final lat = getCurrentLocation.latitude;
-                              final long = getCurrentLocation.longitude;
-                              homeBloc.add(GetGeoWeatherList(lat: lat, long: long));
-                            } catch (err) {
-                              await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                  title: Text("Cannot access your location"),
-                                  content: Text(err.toString()),
-                                  actions: [
-                                    FlatButton(
-                                      onPressed: () {
-                                        instanceGeolocation.openAppSettings();
-                                      },
-                                      child: Text("Open location setting"),
-                                    ),
-                                  ]),
-                            );
-                          }
-                          },
-                        )
+                        dropdownWidget(),
+                        currentLocationWidget()
                       ],
                     ),
                     SizedBox(height: 15),
@@ -157,30 +116,7 @@ class _WeatherForecastState extends State<WeatherForecastPage> {
                               itemCount: weatherList.length,
                               itemBuilder: (context, index) {
                                 final weather = weatherList[index];
-
-                                return Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            "${weather.description}",
-                                            style: TextStyle(fontSize: 30),
-                                          ),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            "${weather.main.temp}°C",
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                          Text(
-                                            weather.formatDate,
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                          SizedBox(height: 10),
-                                          Image.network("http://openweathermap.org/img/w/${weather.weatherIcon}.png", width: 90),
-                                        ],
-                                      ),
-                                    ));
+                                return childItem(weather);
                               },
                             ),
                           ),
@@ -221,6 +157,24 @@ class _WeatherForecastState extends State<WeatherForecastPage> {
         }));
   }
 
+  dropdownWidget(){
+    return Expanded(
+      child: DropdownButtonFormField(
+        value: showDropDownText ? weather.cityName : null,
+        onChanged: (value) {
+          homeBloc.add(GetWeatherList(cityName: value));
+        },
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+        ),
+        items: cityList
+            .map((c) => DropdownMenuItem(
+            value: c.city, child: Text(c.city)))
+            .toList(),
+      ),
+    );
+  }
+
   plusButtonClicked() {
     homeBloc.add(InsertFavoriteCity(data: {
       "city": weather.cityName,
@@ -230,4 +184,62 @@ class _WeatherForecastState extends State<WeatherForecastPage> {
       "date": weather.date
     }));
   }
+
+  currentLocationWidget() {
+    return IconButton(
+      icon: Icon(Icons.my_location),
+      onPressed: ()async{
+        final GeolocatorService instanceGeolocation =
+        new GeolocatorService();
+        try {
+          final getCurrentLocation = await instanceGeolocation.determinePosition();
+          final lat = getCurrentLocation.latitude;
+          final long = getCurrentLocation.longitude;
+          homeBloc.add(GetGeoWeatherList(lat: lat, long: long));
+        } catch (err) {
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                title: Text("Cannot access your location"),
+                content: Text(err.toString()),
+                actions: [
+                  FlatButton(
+                    onPressed: () {
+                      instanceGeolocation.openAppSettings();
+                    },
+                    child: Text("Open location setting"),
+                  ),
+                ]),
+          );
+        }
+      },
+    );
+  }
+
+  childItem(Weather weather) {
+    return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              Text(
+                "${weather.description}",
+                style: TextStyle(fontSize: 30),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "${weather.main.temp}°C",
+                style: TextStyle(fontSize: 20),
+              ),
+              Text(
+                weather.formatDate,
+                style: TextStyle(fontSize: 20),
+              ),
+              SizedBox(height: 10),
+              Image.network("http://openweathermap.org/img/w/${weather.weatherIcon}.png", width: 90),
+            ],
+          ),
+        ));
+  }
+
 }

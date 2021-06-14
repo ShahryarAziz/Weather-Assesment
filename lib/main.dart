@@ -1,6 +1,5 @@
 import 'package:Weather/helpers/db_helper.dart';
-import 'package:Weather/repo/city_repository.dart';
-import 'package:Weather/repo/weather_repository.dart';
+import 'package:Weather/repo/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
           textTheme: TextTheme(title: TextStyle(color: Colors.white))),
       home: BlocProvider<HomeBloc>(
         create: (context) {
-          return HomeBloc(networkRepository: WeatherRepository(), cityRepository: CityRepository(), dbHelper: DBHelper() );
+          return HomeBloc(networkRepository: WeatherRepository(),  dbHelper: DBHelper() );
         },
         child: HomePage(),
       ),
